@@ -100,7 +100,7 @@ local function authenticatedTransmit(d, i, r)
 end
 
 -- Main event loop, this shouldn't have to be changed
-print("[OS NFO] Ready, running as " .. server)
+print("[OS NFO] Ready, running as " .. certificate.server)
 while true do
   local event, side, channel, replyChannel, message, distance = os.pullEvent("modem_message")
 
@@ -109,7 +109,7 @@ while true do
   if channel == port and replyChannel == port then
     if type(message) == "table" then
       if not message.a then
-        if message.t and message.i and message.d and message.o == server then
+        if message.t and message.i and message.d and message.o == certificate.server then
           if events[message.t] then
             print("Executing event " .. message.t)
             xpcall(function()
