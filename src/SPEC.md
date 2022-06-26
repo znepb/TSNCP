@@ -103,7 +103,8 @@ Both the client and server should remember nonces that have been used to prevent
   a = true, -- Tells the receiver this packet is encrypted
   o = string, -- The target server's name in the certificate.
   n = ByteArray, -- A 12 byte ByteArray that chacha20 will use to crypt the data.
-  h = string, -- The hash of the shared token and the nonce, in this format: char(unpack(sha256(char(unpack(shared)) .. char(unpack(nonce))))),
+  t = number, -- os.epoch("utc"), the timestamp of the message. This is used to prevent replay attacks.
+  h = string, -- The hash of the shared token and the nonce, in this format: char(unpack(sha256(char(unpack(shared)) .. char(unpack(nonce)) .. os.epoch("utc")))),
   r = string, -- A unique identifier for the request
   i = string, -- A unique identifier for the session
   s = { ... }, -- Signed data

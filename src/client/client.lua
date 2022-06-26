@@ -26,7 +26,8 @@ function Client:new(server, modem, verbose)
     private = instancePrivate,
     public = instancePublic,
     connected = false,
-    messageConnections = {}
+    messageConnections = {},
+    timestamps = {}
   }, Client_mt)
 end
 
@@ -93,8 +94,9 @@ end
 function Client:transmitRaw(data, requestID)
   if self.connected == false then error('Not connected!') end
 
+  local timestamp = os.epoch("utc")
   local nonce = utils.genNonce(12)
-  local hash = utils.bats(ecc.sha256.digest(utils.bats(self.shared) .. utils.bats(nonce)))
+  local hash = utils.bats(ecc.sha256.digest(utils.bats(self.shared) .. utils.bats(nonce) .. timestamp))
   local requestID = requestID or utils.uuid()
   local stringified = textutils.serialise(data)
 
@@ -105,6 +107,7 @@ function Client:transmitRaw(data, requestID)
     a = true,
     o = self.server,
     n = nonce,
+    t = timestamp,
     h = hash,
     r = requestID,
     i = self.id,
@@ -137,9 +140,13 @@ function Client:transmit(data)
       local event, side, channel, reply, message, distance = os.pullEvent("modem_message")
 
       if message.v ~= 1 then return end
+      if message.a ~= true then return end
       if target and message.o and message.o ~= self.server then return end
+      if message.t + 250 < os.epoch("utc") then return end
+      if self.timestamps[message.t] then return end
+
       if channel == 10000 and message.r == requestID and message.a == true and message.i == self.id then
-        local hash = utils.bats(ecc.sha256.digest(utils.bats(self.shared) .. utils.bats(message.n)))
+        local hash = utils.bats(ecc.sha256.digest(utils.bats(self.shared) .. utils.bats(message.n) .. message.t))
 
         if message.h == hash then
           local isValid = ecc.verify(self.remotePublic, message.c, message.s)
@@ -182,10 +189,14 @@ end
 -- @param message table The message to decrypt.
 -- @return table The decrypted message. This will be nil if it wasn't in the right format.
 function Client:decryptMessage(message)
+  local now = os.epoch("utc")
+
   if message.v ~= 1 then return end
   if message.o ~= self.server then return end
+  if message.t + 250 < now then return end
+  if self.timestamps[message.t] then return end
   if message.a == true and message.i == self.id then
-    local hash = utils.bats(ecc.sha256.digest(utils.bats(self.shared) .. utils.bats(message.n)))
+    local hash = utils.bats(ecc.sha256.digest(utils.bats(self.shared) .. utils.bats(message.n) .. message.t))
   
     if message.h == hash then
       local isValid = ecc.verify(self.remotePublic, message.c, message.s)
@@ -193,6 +204,8 @@ function Client:decryptMessage(message)
       if isValid then
         local data = utils.bats(ecc.chacha20.crypt(message.c, self.shared, message.n))
         response = textutils.unserialise(data)
+
+        self.timestamps[message.t] = true
         
         return response
       end
@@ -205,6 +218,17 @@ end
 --- Connects a function to when a message is received.
 function Client:onMessage(name, func)
   self.messageConnections[name] = func
+end
+
+--- Removes all timestamps that are held to prevent replay attacks. This runs every time the server receives an event.
+function Client:flushTimestamps()
+  local now = os.epoch("utc")
+  
+  for i, v in pairs(self.timestamps) do
+    if i + 250 < now then
+      self.timestamps[i] = nil
+    end
+  end
 end
 
 --- Runs the client.
@@ -221,6 +245,8 @@ function Client:run()
         end
       end
     end
+
+    self:flushTimestamps()
   end
 end
 

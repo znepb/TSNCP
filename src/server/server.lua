@@ -78,13 +78,15 @@ function Server:transmitSecure(dat, id, reply, key)
   local data = textutils.serialise(dat)
   local nonce = utils.genNonce(12)
   local crypted = ecc.chacha20.crypt(data, key, nonce)
+  local timestamp = os.epoch("utc")
   
   self.modem.transmit(self.port, self.port, {
     v = 1,
     a = true,
     o = self.certificate.name,
     n = nonce,
-    h = utils.byteArrayToString(ecc.sha256.digest(utils.byteArrayToString(key) .. utils.byteArrayToString(nonce))),
+    t = timestamp,
+    h = utils.byteArrayToString(ecc.sha256.digest(utils.byteArrayToString(key) .. utils.byteArrayToString(nonce) .. timestamp)),
     i = id,
     r = reply,
     s = ecc.sign(self.instanceKeys.private, crypted),
@@ -98,6 +100,19 @@ function Server:getSessions()
   return self.sessions
 end
 
+--- Removes all timestamps that are held to prevent replay attacks. This runs every time the server receives an event.
+function Server:flushTimestamps()
+  local now = os.epoch("utc")
+  
+  for _, s in pairs(self.sessions) do
+    for t, _ in pairs(s.timestamps) do
+      if t + 250 < now then
+        s.timestamps[t] = nil
+      end
+    end
+  end
+end
+
 --- Starts the party.
 function Server:start()
   self:addEvent("hello", function(self, data)
@@ -107,7 +122,8 @@ function Server:start()
     self.sessions[id] = {
       status = "ready",
       clientPublic = data.public,
-      shared = shared
+      shared = shared,
+      timestamps = {}
     }
     
     return {
@@ -188,9 +204,13 @@ function Server:start()
             -- Message is authenticated
             xpcall(function()
               local session = self.sessions[message.i]
+              local now = os.epoch("utc")
+
+              if message.t + 250 < now then return end
+              if session.timestamps[message.t] then return end
 
               if session then
-                local localHash = utils.bats(ecc.sha256.digest(utils.bats(session.shared) .. utils.bats(message.n)))
+                local localHash = utils.bats(ecc.sha256.digest(utils.bats(session.shared) .. utils.bats(message.n) .. message.t))
                 if message.h == localHash then
                   local isValid = ecc.verify(session.clientPublic, message.c, message.s)
 
@@ -200,6 +220,7 @@ function Server:start()
 
                     print("[OS NFO] Executing " .. data.message .. " for validated client " .. message.i)
 
+                    self.sessions[message.i].timestamps[message.t] = true
                     local data, key = self.securedEvents[data.message](data.data, message.i)
                     self:transmitSecure(data, message.i, message.r, key)
                   else
@@ -217,6 +238,8 @@ function Server:start()
         end
       end
     end
+
+    self:flushTimestamps()
   end
 end
 
