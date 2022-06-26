@@ -1,8 +1,8 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>TSNCP Packet Information</title><meta property="og:title" content="TSNCP Packet Information" /><meta property="og:type" content="website" /><meta name="description" content="TSNCP uses 6 types of packets:" /><meta property="og:description" content="TSNCP uses 6 types of packets:" /><meta property="og:site_name" content="TSNCP" /><link rel="stylesheet" href="..\main.css?v=8bfa8c58" type="text/css" /></head><body><nav id="nav"><button id="nav-reveal" type="button">&#9776;</button><h1><a href="..\.\">TSNCP</a></h1><div class="nav-links"><h2 tabindex="0">Globals</h2><ul><li><strong class="sidebar-link selected">TSNCP Packet Information</strong></li></ul><h2 class="collapsed" tabindex="0">Modules</h2><ul><li><a href="..\library\ecc.html" class="sidebar-link">ecc</a></li><li><a href="..\library\server.html" class="sidebar-link">server</a></li><li><a href="..\library\utils.html" class="sidebar-link">utils</a></li></ul></div></nav><div id="main"><div id="search-form" role="form"><input id="search-box" type="text" placeholder="Search..." autocomplete="off" tabindex="0"></input><div id="search-results"></div></div><section id="content"><h1>TSNCP Packet Information</h1><p>TSNCP uses 6 types of packets:</p>
+<!DOCTYPE html><html><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>TSNCP Packet Information</title><meta property="og:title" content="TSNCP Packet Information" /><meta property="og:type" content="website" /><meta name="description" content="TSNCP uses 5 types of packets:" /><meta property="og:description" content="TSNCP uses 5 types of packets:" /><meta property="og:site_name" content="TSNCP" /><link rel="stylesheet" href="..\main.css?v=8bfa8c58" type="text/css" /></head><body><nav id="nav"><button id="nav-reveal" type="button">&#9776;</button><h1><a href="..\.\">TSNCP</a></h1><div class="nav-links"><h2 tabindex="0">Globals</h2><ul><li><strong class="sidebar-link selected">TSNCP Packet Information</strong></li></ul><h2 class="collapsed" tabindex="0">Modules</h2><ul><li><a href="..\library\client.html" class="sidebar-link">client</a></li><li><a href="..\library\ecc.html" class="sidebar-link">ecc</a></li><li><a href="..\library\server.html" class="sidebar-link">server</a></li><li><a href="..\library\utils.html" class="sidebar-link">utils</a></li></ul></div></nav><div id="main"><div id="search-form" role="form"><input id="search-box" type="text" placeholder="Search..." autocomplete="off" tabindex="0"></input><div id="search-results"></div></div><section id="content"><h1>TSNCP Packet Information</h1><p>TSNCP uses 5 types of packets:</p>
 <ul>
-<li>Signature Server Request
+<li>Certificate Server Request
 </li>
-<li>Signature Server Response
+<li>Certificate Server Response
 </li>
 <li>Orgin Server Request
 </li>
@@ -11,9 +11,8 @@
 <li>Authenticated Packet
 </li>
 </ul>
-<p>Signature server requests occur on port 12345, and orgin server requests occur on port 10000.</p>
-<p><strong>This document outlines spec v0 (beta version)</strong><br />
-<strong>WARNING:</strong> This spec is not final! This spec will change before the first official release.</p>
+<p>Certificate server requests occur on port 12345, and orgin server requests occur on port 10000.</p>
+<p><strong>This document outlines spec v1</strong></p>
 <h2>Object Outlines</h2>
 <h3>ByteArray</h3>
 <p>This is an array of bytes from ECC. See <a href="https://www.computercraft.info/forums2/index.php?/topic/29803-elliptic-curve-cryptography/">here</a>.</p>
@@ -30,23 +29,26 @@ An example certificate is shown below:</p>
 <h3>Certificate Authority Server Request</h3>
 <p>Certificate Authority server requests are identical to orgin server requests, except they have a required <code>t</code> (type) and <code>d</code> (data) arguments, and no <code>o</code> (orgin) argument.</p>
 <pre class="highlight" data-lua-kind="expr"><span class="symbol">{</span>
-  <span class="ident">t</span> <span class="symbol">=</span> <span class="string">"retrieveSignature"</span><span class="symbol">,</span> <span class="comment">-- Signature will be changed to certificate in the future (before 1.0)</span>
+  <span class="ident">v</span> <span class="symbol">=</span> <span class="number">1</span><span class="symbol">,</span>
+  <span class="ident">t</span> <span class="symbol">=</span> <span class="string">"retrieveCertificate"</span><span class="symbol">,</span>
   <span class="ident">i</span> <span class="symbol">=</span> <span class="ident">any</span><span class="symbol">,</span> <span class="comment">-- Any kind of unique identifier</span>
   <span class="ident">d</span> <span class="symbol">=</span> <span class="symbol">{</span>
-    <span class="ident">signature</span> <span class="symbol">=</span> <span class="ident">string</span> <span class="comment">-- Signature will be changed to certificate in the future (before 1.0)</span>
+    <span class="ident">certificate</span> <span class="symbol">=</span> <span class="ident">string</span>
   <span class="symbol">}</span>
 <span class="symbol">}</span>
 <span class="symbol"></span></pre><h3>Certificate Authority Server Response</h3>
 <p>Basic response from the Certificate Authority. Simmilarly to the Certificate Authority Server Request, <code>t</code> will always be constant, <code>resp</code> in this case, and no <code>o</code> entry is present,</p>
 <pre class="highlight" data-lua-kind="expr"><span class="symbol">{</span>
+  <span class="ident">v</span> <span class="symbol">=</span> <span class="number">1</span><span class="symbol">,</span>
   <span class="ident">t</span> <span class="symbol">=</span> <span class="string">"resp"</span><span class="symbol">,</span>
   <span class="ident">i</span> <span class="symbol">=</span> <span class="ident">any</span><span class="symbol">,</span> <span class="comment">-- This will be the same as the identifier on the initial packet</span>
-  <span class="ident">s</span> <span class="symbol">=</span> <span class="ident">ByteArray</span><span class="symbol">,</span> <span class="comment">-- A signed version of the serialized table, d. The client should already know the public key of the signature server so this can be vertified.</span>
+  <span class="ident">s</span> <span class="symbol">=</span> <span class="ident">ByteArray</span><span class="symbol">,</span> <span class="comment">-- A signed version of the serialized table, d. The client should already know the public key of the certificate authority so this can be vertified.</span>
   <span class="ident">d</span> <span class="symbol">=</span> <span class="ident">string</span> <span class="comment">-- A serialized table containing a certificate, outlined above. Note that this is not encrypted, as no handshake has taken place.</span>
 <span class="symbol">}</span>
 <span class="symbol"></span></pre><h3>Orgin Server Request</h3>
 <p>Unencrypted requests should only be used during handshake. These are identical to the Certificate Authority Server Request packets, but with a <code>o</code> (orgin) argument, customizable <code>d</code> (data) and <code>t</code> (type).</p>
 <pre class="highlight" data-lua-kind="expr"><span class="symbol">{</span>
+  <span class="ident">v</span> <span class="symbol">=</span> <span class="number">1</span><span class="symbol">,</span>
   <span class="ident">t</span> <span class="symbol">=</span> <span class="ident">string</span><span class="symbol">,</span> <span class="comment">-- The type of message</span>
   <span class="ident">i</span> <span class="symbol">=</span> <span class="ident">any</span><span class="symbol">,</span> <span class="comment">-- A unique identifier to search for responses</span>
   <span class="ident">o</span> <span class="symbol">=</span> <span class="ident">string</span><span class="symbol">,</span> <span class="comment">-- The target server's name in the certificate.</span>
@@ -55,6 +57,7 @@ An example certificate is shown below:</p>
 <span class="symbol"></span></pre><h3>Orgin Server Response</h3>
 <p>Again, identical to the certificate authority's response, but with an <code>o</code> (orgin) argument, and customizable <code>d</code> (data) and <code>t</code> (type).</p>
 <pre class="highlight" data-lua-kind="expr"><span class="symbol">{</span>
+  <span class="ident">v</span> <span class="symbol">=</span> <span class="number">1</span><span class="symbol">,</span>
   <span class="ident">t</span> <span class="symbol">=</span> <span class="ident">string</span><span class="symbol">,</span> <span class="comment">-- The type of message. It is reccomended that this not be the same as the request type, as responses lack a header saying they are a response.</span>
   <span class="ident">i</span> <span class="symbol">=</span> <span class="ident">any</span><span class="symbol">,</span> <span class="comment">-- This will be the same as the identifier in the request packet</span>
   <span class="ident">o</span> <span class="symbol">=</span> <span class="ident">string</span><span class="symbol">,</span> <span class="comment">-- The server's name in the certificate.</span>
@@ -65,6 +68,7 @@ An example certificate is shown below:</p>
 <p>The client and server use the same packet structure to communicate when authenticated.
 Both the client and server should remember nonces that have been used to prevent replay attacks.</p>
 <pre class="highlight" data-lua-kind="expr"><span class="symbol">{</span>
+  <span class="ident">v</span> <span class="symbol">=</span> <span class="number">1</span><span class="symbol">,</span>
   <span class="ident">a</span> <span class="symbol">=</span> <span class="literal-kw">true</span><span class="symbol">,</span> <span class="comment">-- Tells the receiver this packet is encrypted</span>
   <span class="ident">o</span> <span class="symbol">=</span> <span class="ident">string</span><span class="symbol">,</span> <span class="comment">-- The target server's name in the certificate.</span>
   <span class="ident">n</span> <span class="symbol">=</span> <span class="ident">ByteArray</span><span class="symbol">,</span> <span class="comment">-- A 12 byte ByteArray that chacha20 will use to crypt the data.</span>
@@ -77,6 +81,7 @@ Both the client and server should remember nonces that have been used to prevent
 <span class="symbol"></span></pre><h2>Opening Connections (Handshake)</h2>
 <p>To open a connection, the client sends a <code>hello</code> request to the server, with the client's public key. An example is shown below:</p>
 <pre class="highlight" data-lua-kind="expr"><span class="symbol">{</span>
+  <span class="ident">v</span> <span class="symbol">=</span> <span class="number">1</span><span class="symbol">,</span>
   <span class="ident">t</span> <span class="symbol">=</span> <span class="string">"hello"</span><span class="symbol">,</span>
   <span class="ident">i</span> <span class="symbol">=</span> <span class="string">"3eb4cb1b-45aa-407b-a9bb-1ffeb85c2600"</span><span class="symbol">,</span>
   <span class="ident">o</span> <span class="symbol">=</span> <span class="string">"bezos.tol"</span><span class="symbol">,</span>
@@ -86,6 +91,7 @@ Both the client and server should remember nonces that have been used to prevent
 <span class="symbol">}</span>
 <span class="symbol"></span></pre><p>If the server is online, the client will receive this response:</p>
 <pre class="highlight" data-lua-kind="expr"><span class="symbol">{</span>
+  <span class="ident">v</span> <span class="symbol">=</span> <span class="number">1</span><span class="symbol">,</span>
   <span class="ident">t</span> <span class="symbol">=</span> <span class="string">"resp"</span><span class="symbol">,</span>
   <span class="ident">i</span> <span class="symbol">=</span> <span class="string">"3eb4cb1b-45aa-407b-a9bb-1ffeb85c2600"</span><span class="symbol">,</span>
   <span class="ident">o</span> <span class="symbol">=</span> <span class="string">"bezos.tol"</span><span class="symbol">,</span>
@@ -99,6 +105,7 @@ Both the client and server should remember nonces that have been used to prevent
 <span class="symbol">}</span>
 <span class="symbol"></span></pre><p>After this, the client and server will create a shared key via <a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Diffe-Hellman key exchange</a>. To verify that they have come to the same result, the client will send one last packet to the server, with a message <code>verify</code>. Below is shown this packet, unencrypted.</p>
 <pre class="highlight" data-lua-kind="expr"><span class="symbol">{</span>
+  <span class="ident">v</span> <span class="symbol">=</span> <span class="number">1</span><span class="symbol">,</span>
   <span class="ident">a</span> <span class="symbol">=</span> <span class="literal-kw">true</span><span class="symbol">,</span>
   <span class="ident">o</span> <span class="symbol">=</span> <span class="string">"bezos.tol"</span><span class="symbol">,</span>
   <span class="ident">n</span> <span class="symbol">=</span> <span class="ident">ByteArray</span><span class="symbol">,</span> <span class="comment">-- 12 bytes</span>
@@ -112,6 +119,7 @@ Both the client and server should remember nonces that have been used to prevent
 <span class="symbol">}</span>
 <span class="symbol"></span></pre><p>Finally, if the verification was a success, the client will receive a packet, with the message. <code>verifySuccess</code>.</p>
 <pre class="highlight" data-lua-kind="expr"><span class="symbol">{</span>
+  <span class="ident">v</span> <span class="symbol">=</span> <span class="number">1</span><span class="symbol">,</span>
   <span class="ident">a</span> <span class="symbol">=</span> <span class="literal-kw">true</span><span class="symbol">,</span>
   <span class="ident">o</span> <span class="symbol">=</span> <span class="string">"bezos.tol"</span><span class="symbol">,</span>
   <span class="ident">n</span> <span class="symbol">=</span> <span class="ident">ByteArray</span><span class="symbol">,</span> <span class="comment">-- 12 bytes</span>
@@ -128,9 +136,9 @@ Both the client and server should remember nonces that have been used to prevent
 <p>The client will send an authenticated packet, with the message <code>goodbye</code>. To confirm this, the server will respond with a packet with <code>goodbye</code> as well.</p>
 <h2>Antiipated Changes (pre-1.0)</h2>
 <ul>
-<li>All packets will be given a <code>v</code> (version) entry, a number showing the version of the packet.
+<li>~~All packets will be given a <code>v</code> (version) entry, a number showing the version of the packet.~~
 </li>
-<li>All appearances of <code>signature</code> will be changed to <code>certificate</code>, where nessecary.
+<li>~~All appearances of <code>signature</code> will be changed to <code>certificate</code>, where nessecary.~~
 </li>
 </ul>
 </section><footer>Last updated on 2022-06-26</footer></div><div id="search-overlay"></div><script src="..\main.js?v=0f849364" type="text/javascript" defer=""></script></body></html>

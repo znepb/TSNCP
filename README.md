@@ -4,7 +4,7 @@ The Tiktin Secure Network Communication Protocol
 (TSNCP) is a network protocol in ComputerCraft
 intended for use on the Tiktin Minecraft server.
 
-Documentation coming soon!
+Documentation can be found here: https://znepb.github.io/TSNCP/
 
 ## Building
 
@@ -14,6 +14,12 @@ Building the server's function (and in the future, client's functions) can be do
 
 ```bash
 $ luabundler bundle src/server/server.lua -p "src/common/?.lua" -p "src/server/?.lua" -o build/server.lua
+```
+
+### Client
+
+```bash
+$ luabundler bundle src/client/client.lua -p "src/common/?.lua" -p "src/client/?.lua" -o build/client.lua
 ```
 
 ## Docgen
@@ -28,7 +34,7 @@ $ ./illuaminate doc-gen
 - [x] ~~Orgin Server~~
 - [x] ~~Client Utils and such~~
 - [x] ~~Rebuild server~~
-- [ ] Rebuild client
-- [ ] Documentation
-- [ ] Better utilities
-- [ ] Certificate caching
+- [x] ~~Rebuild client~~
+- [x] ~~Documentation~~
+- [x] ~~Better utilities~~
+- [x] ~~Certificate caching~~

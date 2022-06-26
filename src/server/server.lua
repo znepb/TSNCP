@@ -1,8 +1,8 @@
 --- Utilities for a simple server, including creation, events, and transmission.
 -- @module server
 
-local ecc = require("ecc")
-local utils = require("utils")
+local ecc = require("common.ecc")
+local utils = require("common.utils")
 
 local Server = {}
 local Server_mt = {__index = Server}
@@ -58,6 +58,7 @@ function Server:transmit(t, i, d)
   local signed = ecc.sign(self.serverKeys.private, serialized)
   
   self.modem.transmit(self.port, self.port, {
+    v = 1,
     t = t,
     o = self.certificate.name,
     i = i,
@@ -67,26 +68,34 @@ function Server:transmit(t, i, d)
 end
 
 --- Transmits a message to an authenticated client
--- @param d table The data to send
--- @param i number The session ID that this message is intended for
--- @param[opt] r number The ID the server is responding to
-function Server:transmitSecure(d, r, i, key)
-  if key == nil then key = self.sessions[i].shared end
+-- @param dat table The data to send
+-- @param id number The session ID that this message is intended for
+-- @param[opt] reply number The ID the server is responding to
+-- @param[opt] key string The key to use for encryption
+function Server:transmitSecure(dat, id, reply, key)
+  if key == nil then key = self.sessions[id].shared end
 
-  local data = textutils.serialise(d)
+  local data = textutils.serialise(dat)
   local nonce = utils.genNonce(12)
   local crypted = ecc.chacha20.crypt(data, key, nonce)
   
   self.modem.transmit(self.port, self.port, {
+    v = 1,
     a = true,
     o = self.certificate.name,
     n = nonce,
     h = utils.byteArrayToString(ecc.sha256.digest(utils.byteArrayToString(key) .. utils.byteArrayToString(nonce))),
-    i = i,
-    r = r,
+    i = id,
+    r = reply,
     s = ecc.sign(self.instanceKeys.private, crypted),
     c = crypted
   })
+end
+
+--- Gets all active sessions.
+-- @return table The sessions.
+function Server:getSessions()
+  return self.sessions
 end
 
 --- Starts the party.
@@ -138,74 +147,73 @@ function Server:start()
 
     if channel == self.port and replyChannel == self.port then
       if type(message) == "table" then
-        if not message.a then
-          -- Message is not authenticated
-          if message.t and message.i and message.d and message.o == self.certificate.name then
-            if self.events[message.t] then
-              print("[OS NFO] Executing event " .. message.t)
-              xpcall(function()
-                local data = self.events[message.t](self, message.d)
-                self:transmit("resp", message.i, data)
-              end, function(err)
-                printError("[OS ERR] Event Error!")
-                printError("[OS ERR] " .. err)
-                if err:sub(1, 1) == ":" then
-                  self:transmit("resp", message.i, 
-                    {
-                      status = "error",
-                      message = err:sub(2)
-                    }
-                  )
-                else
-                  self:transmit("resp", message.i, 
-                    {
-                      status = "error",
-                      message = "Internal error"
-                    }
-                  )
-                end
-              end)
-            else
-              self:transmit("resp", message.i, 
-                {
-                  type = "error",
-                  message = "Invalid method"
-                }
-              )
-            end
-          end
-        else
-          -- Message is authenticated
-          xpcall(function()
-            local session = self.sessions[message.i]
-
-            if session then
-              local localHash = utils.byteArrayToString(
-                ecc.sha256.digest(utils.byteArrayToString(session.shared) .. utils.byteArrayToString(message.n))
-              )
-
-              if message.h == localHash then
-                local isValid = ecc.verify(session.clientPublic, message.c, message.s)
-
-                if isValid then
-                  local crypted = utils.byteArrayToString(ecc.chacha20.crypt(message.c, session.shared, message.n))
-                  local data = textutils.unserialise(crypted)
-
-                  print("[OS NFO] Executing " .. data.message .. " for validated client " .. message.i)
-
-                  local data, key = self.securedEvents[data.message](data.data, message.i)
-                  self:transmitSecure(data, message.r, message.i, key)
-                else
-                  print("[OS NFO] Invalid signature!")
-                end
+        if message.v == 1 then
+          if not message.a then
+            -- Message is not authenticated
+            if message.t and message.i and message.d and message.o == self.certificate.name then
+              if self.events[message.t] then
+                print("[OS NFO] Executing event " .. message.t)
+                xpcall(function()
+                  local data = self.events[message.t](self, message.d)
+                  self:transmit("resp", message.i, data)
+                end, function(err)
+                  printError("[OS ERR] Event Error!")
+                  printError("[OS ERR] " .. err)
+                  if err:sub(1, 1) == ":" then
+                    self:transmit("resp", message.i, 
+                      {
+                        status = "error",
+                        message = err:sub(2)
+                      }
+                    )
+                  else
+                    self:transmit("resp", message.i, 
+                      {
+                        status = "error",
+                        message = "Internal error"
+                      }
+                    )
+                  end
+                end)
               else
-                print("[OS NFO] Invalid hash!")
+                self:transmit("resp", message.i, 
+                  {
+                    type = "error",
+                    message = "Invalid method"
+                  }
+                )
               end
             end
-          end, function(err)
-            printError("[OS ERR] Authed message handeler error:")
-            printError("[OS ERR] " .. err)
-          end)
+          else
+            -- Message is authenticated
+            xpcall(function()
+              local session = self.sessions[message.i]
+
+              if session then
+                local localHash = utils.bats(ecc.sha256.digest(utils.bats(session.shared) .. utils.bats(message.n)))
+                if message.h == localHash then
+                  local isValid = ecc.verify(session.clientPublic, message.c, message.s)
+
+                  if isValid then
+                    local crypted = utils.byteArrayToString(ecc.chacha20.crypt(message.c, session.shared, message.n))
+                    local data = textutils.unserialise(crypted)
+
+                    print("[OS NFO] Executing " .. data.message .. " for validated client " .. message.i)
+
+                    local data, key = self.securedEvents[data.message](data.data, message.i)
+                    self:transmitSecure(data, message.i, message.r, key)
+                  else
+                    print("[OS NFO] Invalid signature!")
+                  end
+                else
+                  print("[OS NFO] Invalid hash!")
+                end
+              end
+            end, function(err)
+              printError("[OS ERR] Authed message handeler error:")
+              printError("[OS ERR] " .. err)
+            end)
+          end
         end
       end
     end

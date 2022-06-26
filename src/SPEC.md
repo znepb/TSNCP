@@ -1,17 +1,16 @@
 # TSNCP Packet Information
 
-TSNCP uses 6 types of packets:
+TSNCP uses 5 types of packets:
 
-- Signature Server Request
-- Signature Server Response
+- Certificate Server Request
+- Certificate Server Response
 - Orgin Server Request
 - Orgin Server Response
 - Authenticated Packet
 
-Signature server requests occur on port 12345, and orgin server requests occur on port 10000.
+Certificate server requests occur on port 12345, and orgin server requests occur on port 10000.
 
-**This document outlines spec v0 (beta version)**  
-**WARNING:** This spec is not final! This spec will change before the first official release.
+**This document outlines spec v1**
 
 ## Object Outlines
 
@@ -41,10 +40,11 @@ Certificate Authority server requests are identical to orgin server requests, ex
 
 ```lua
 {
-  t = "retrieveSignature", -- Signature will be changed to certificate in the future (before 1.0)
+  v = 1,
+  t = "retrieveCertificate",
   i = any, -- Any kind of unique identifier
   d = {
-    signature = string -- Signature will be changed to certificate in the future (before 1.0)
+    certificate = string
   }
 }
 ```
@@ -55,9 +55,10 @@ Basic response from the Certificate Authority. Simmilarly to the Certificate Aut
 
 ```lua
 {
+  v = 1,
   t = "resp",
   i = any, -- This will be the same as the identifier on the initial packet
-  s = ByteArray, -- A signed version of the serialized table, d. The client should already know the public key of the signature server so this can be vertified.
+  s = ByteArray, -- A signed version of the serialized table, d. The client should already know the public key of the certificate authority so this can be vertified.
   d = string -- A serialized table containing a certificate, outlined above. Note that this is not encrypted, as no handshake has taken place.
 }
 ```
@@ -68,6 +69,7 @@ Unencrypted requests should only be used during handshake. These are identical t
 
 ```lua
 {
+  v = 1,
   t = string, -- The type of message
   i = any, -- A unique identifier to search for responses
   o = string, -- The target server's name in the certificate.
@@ -81,6 +83,7 @@ Again, identical to the certificate authority's response, but with an `o` (orgin
 
 ```lua
 {
+  v = 1,
   t = string, -- The type of message. It is reccomended that this not be the same as the request type, as responses lack a header saying they are a response.
   i = any, -- This will be the same as the identifier in the request packet
   o = string, -- The server's name in the certificate.
@@ -96,6 +99,7 @@ Both the client and server should remember nonces that have been used to prevent
 
 ```lua
 {
+  v = 1,
   a = true, -- Tells the receiver this packet is encrypted
   o = string, -- The target server's name in the certificate.
   n = ByteArray, -- A 12 byte ByteArray that chacha20 will use to crypt the data.
@@ -113,6 +117,7 @@ To open a connection, the client sends a `hello` request to the server, with the
 
 ```lua
 {
+  v = 1,
   t = "hello",
   i = "3eb4cb1b-45aa-407b-a9bb-1ffeb85c2600",
   o = "bezos.tol",
@@ -126,6 +131,7 @@ If the server is online, the client will receive this response:
 
 ```lua
 {
+  v = 1,
   t = "resp",
   i = "3eb4cb1b-45aa-407b-a9bb-1ffeb85c2600",
   o = "bezos.tol",
@@ -143,6 +149,7 @@ After this, the client and server will create a shared key via [Diffe-Hellman ke
 
 ```lua
 {
+  v = 1,
   a = true,
   o = "bezos.tol",
   n = ByteArray, -- 12 bytes
@@ -160,6 +167,7 @@ Finally, if the verification was a success, the client will receive a packet, wi
 
 ```lua
 {
+  v = 1,
   a = true,
   o = "bezos.tol",
   n = ByteArray, -- 12 bytes
@@ -181,5 +189,5 @@ The client will send an authenticated packet, with the message `goodbye`. To con
 
 ## Antiipated Changes (pre-1.0)
 
-- All packets will be given a `v` (version) entry, a number showing the version of the packet.
-- All appearances of `signature` will be changed to `certificate`, where nessecary.
+- ~~All packets will be given a `v` (version) entry, a number showing the version of the packet.~~
+- ~~All appearances of `signature` will be changed to `certificate`, where nessecary.~~

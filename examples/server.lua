@@ -1,6 +1,6 @@
--- A simple server that echos what is sent to it with the event "echo"
+-- A simple server that echos what is sent to it with the event "echo", and sends a message "whatup dawg? " .. os.epoch("utc") to all clients every 5 seconds.
 
-local server = require("server-bundle")
+local server = require("server")
 local keys = require("keys")
 local certificate = require("certificate")
 
@@ -13,4 +13,18 @@ newServer:addSecuredEvent("echo", function(data, id)
   }
 end)
 
-newServer:start()
+parallel.waitForAll(function()
+  newServer:start()
+end, function()
+  while true do
+    for i, v in pairs(newServer:getSessions()) do
+      newServer:transmitSecure({
+        message = "basic",
+        data = {
+          text = "whatup dawg? " .. os.epoch("utc")
+        }
+      }, i)
+    end
+    sleep(5)
+  end
+end)

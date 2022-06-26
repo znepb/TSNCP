@@ -1,12 +1,14 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>TSNCP</title><meta property="og:title" content="TSNCP" /><meta property="og:type" content="website" /><meta name="description" content="Documentation index for TSNCP" /><meta property="og:description" content="Documentation index for TSNCP" /><meta property="og:site_name" content="TSNCP" /><link rel="stylesheet" href="main.css?v=8bfa8c58" type="text/css" /></head><body><nav id="nav"><button id="nav-reveal" type="button">&#9776;</button><h1><a href="./">TSNCP</a></h1><div class="nav-links"><h2 tabindex="0">Globals</h2><ul><li><a href="module/SPEC.html" class="sidebar-link">TSNCP Packet Information</a></li></ul><h2 tabindex="0">Modules</h2><ul><li><a href="library/ecc.html" class="sidebar-link">ecc</a></li><li><a href="library/server.html" class="sidebar-link">server</a></li><li><a href="library/utils.html" class="sidebar-link">utils</a></li></ul></div></nav><div id="main"><div id="search-form" role="form"><input id="search-box" type="text" placeholder="Search..." autocomplete="off" tabindex="0"></input><div id="search-results"></div></div><section id="content"><h1>Tiktin Secure Network Communication Protocol</h1>
+<!DOCTYPE html><html><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>TSNCP</title><meta property="og:title" content="TSNCP" /><meta property="og:type" content="website" /><meta name="description" content="Documentation index for TSNCP" /><meta property="og:description" content="Documentation index for TSNCP" /><meta property="og:site_name" content="TSNCP" /><link rel="stylesheet" href="main.css?v=8bfa8c58" type="text/css" /></head><body><nav id="nav"><button id="nav-reveal" type="button">&#9776;</button><h1><a href="./">TSNCP</a></h1><div class="nav-links"><h2 tabindex="0">Globals</h2><ul><li><a href="module/SPEC.html" class="sidebar-link">TSNCP Packet Information</a></li></ul><h2 tabindex="0">Modules</h2><ul><li><a href="library/client.html" class="sidebar-link">client</a></li><li><a href="library/ecc.html" class="sidebar-link">ecc</a></li><li><a href="library/server.html" class="sidebar-link">server</a></li><li><a href="library/utils.html" class="sidebar-link">utils</a></li></ul></div></nav><div id="main"><div id="search-form" role="form"><input id="search-box" type="text" placeholder="Search..." autocomplete="off" tabindex="0"></input><div id="search-results"></div></div><section id="content"><h1>Tiktin Secure Network Communication Protocol</h1>
 <p>The Tiktin Secure Network Communication Protocol
 (TSNCP) is a network protocol in ComputerCraft
 intended for use on the Tiktin Minecraft server.</p>
-<p>Documentation coming soon!</p>
+<p>Documentation can be found here: https://znepb.github.io/TSNCP/</p>
 <h2>Building</h2>
 <p>Building the server's function (and in the future, client's functions) can be done using <a href="https://github.com/Benjamin-Dobell/luabundler">luabundler</a>.</p>
 <h3>Server</h3>
 <pre class="highlight"><code class="language-bash">$ luabundler bundle src/server/server.lua -p &quot;src/common/?.lua&quot; -p &quot;src/server/?.lua&quot; -o build/server.lua
+</code></pre><h3>Client</h3>
+<pre class="highlight"><code class="language-bash">$ luabundler bundle src/client/client.lua -p &quot;src/common/?.lua&quot; -p &quot;src/client/?.lua&quot; -o build/client.lua
 </code></pre><h2>Docgen</h2>
 <pre class="highlight"><code class="language-bash">$ ./illuaminate doc-gen
 </code></pre><h2>Todo List</h2>
@@ -19,13 +21,13 @@ intended for use on the Tiktin Minecraft server.</p>
 </li>
 <li>[x] ~~Rebuild server~~
 </li>
-<li>[ ] Rebuild client
+<li>[x] ~~Rebuild client~~
 </li>
-<li>[ ] Documentation
+<li>[x] ~~Documentation~~
 </li>
-<li>[ ] Better utilities
+<li>[x] ~~Better utilities~~
 </li>
-<li>[ ] Certificate caching
+<li>[x] ~~Certificate caching~~
 </li>
 </ul>
-<h2>Globals</h2><table class="definition-list"><tr><th><a href="module/SPEC.html">TSNCP Packet Information</a></th><td>TSNCP uses 6 types of packets:</td></tr></table><h2>Modules</h2><table class="definition-list"><tr><th><a href="library/ecc.html">ecc</a></th><td></td></tr><tr><th><a href="library/server.html">server</a></th><td>Utilities for a simple server, including creation, events, and transmission.</td></tr><tr><th><a href="library/utils.html">utils</a></th><td>Some basic utility functions.</td></tr></table></section><footer>Last updated on 2022-06-26</footer></div><div id="search-overlay"></div><script src="main.js?v=0f849364" type="text/javascript" defer=""></script></body></html>
+<h2>Globals</h2><table class="definition-list"><tr><th><a href="module/SPEC.html">TSNCP Packet Information</a></th><td>TSNCP uses 5 types of packets:</td></tr></table><h2>Modules</h2><table class="definition-list"><tr><th><a href="library/client.html">client</a></th><td>Utilities for a simple client.</td></tr><tr><th><a href="library/ecc.html">ecc</a></th><td></td></tr><tr><th><a href="library/server.html">server</a></th><td>Utilities for a simple server, including creation, events, and transmission.</td></tr><tr><th><a href="library/utils.html">utils</a></th><td>Some basic utility functions.</td></tr></table></section><footer>Last updated on 2022-06-26</footer></div><div id="search-overlay"></div><script src="main.js?v=0f849364" type="text/javascript" defer=""></script></body></html>

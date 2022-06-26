@@ -1,6 +1,7 @@
 (sources
   /src/server/
   /src/common/
+  /src/client/
   /src/
 )
 
@@ -15,6 +16,7 @@
   (library-path
     /src/server/
     /src/common/
+    /src/client
     /src/
   )
 )
