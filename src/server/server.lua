@@ -9,8 +9,8 @@ local Server_mt = {__index = Server}
 
 --- Creates a new server with the provided information.
 -- @param certificate table The certificate that the server will use.
--- @param publicKey table The private key of the server.
--- @param privateKey table The public key of the server.
+-- @param publicKey table The public key of the server.
+-- @param privateKey table The private key of the server.
 -- @param[opt] modem table The modem that will be used while communicating. If this is not provided, it will be gotten via peripheral.find
 -- @param[opt] port number The port number to use, this should usually be 10000, which is the default.
 -- @return table The new server.

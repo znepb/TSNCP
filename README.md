@@ -13,13 +13,13 @@ Building the server's function (and in the future, client's functions) can be do
 ### Server
 
 ```bash
-$ luabundler bundle src/server/server.lua -p "src/common/?.lua" -p "src/server/?.lua" -o server.lua
+$ luabundler bundle src/server/server.lua -p "src/common/?.lua" -p "src/server/?.lua" -o build/server.lua
 ```
 
 ## Docgen
 
 ```bash
-$ ./illuaminate doc-gen illuaminate.sexp
+$ ./illuaminate doc-gen
 ```
 
 ## Todo List
