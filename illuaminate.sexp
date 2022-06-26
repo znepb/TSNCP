@@ -1,6 +1,7 @@
 (sources
   /src/server/
   /src/common/
+  /src/
 )
 
 (doc
@@ -14,5 +15,6 @@
   (library-path
     /src/server/
     /src/common/
+    /src/
   )
 )

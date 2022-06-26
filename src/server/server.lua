@@ -59,6 +59,7 @@ function Server:transmit(t, i, d)
   
   self.modem.transmit(self.port, self.port, {
     t = t,
+    o = self.certificate.name,
     i = i,
     s = signed,
     d = serialized
@@ -114,7 +115,7 @@ function Server:start()
     print("[OS NFO] Client " .. id .. " has connected!")
 
     return {
-      message = "verifySucces"
+      message = "verifySuccess"
     }
   end)
 
