@@ -43,11 +43,12 @@ end
 print("[SS NFO] Ready")
 while true do
   local event, side, channel, replyChannel, message, distance = os.pullEvent("modem_message")
-  print("[SS NFO] Request from " .. distance .. " blocks away")
 
   if channel == port and replyChannel == port then
     if type(message) == "table" then
-      if message.v == 1 then
+      if message.v == 1 and message.o == nil then
+        print("[SS NFO] Request from " .. distance .. " blocks away")
+
         if message.t and message.i and message.d then
           if events[message.t] then
             xpcall(function()
