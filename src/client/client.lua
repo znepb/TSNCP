@@ -1,8 +1,8 @@
 --- Utilities for a simple client. A /.public.lua file containing a Byte Array of the certificate authority's public key is required.
 -- @module client
 
-local ecc = require("common.ecc")
-local utils = require("common.utils")
+local ecc = require("ecc")
+local utils = require("utils")
 
 local Client = {}
 local Client_mt = {__index = Client}

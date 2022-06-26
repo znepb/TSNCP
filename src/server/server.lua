@@ -1,8 +1,8 @@
 --- Utilities for a simple server, including creation, events, and transmission.
 -- @module server
 
-local ecc = require("common.ecc")
-local utils = require("common.utils")
+local ecc = require("ecc")
+local utils = require("utils")
 
 local Server = {}
 local Server_mt = {__index = Server}

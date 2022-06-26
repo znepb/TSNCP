@@ -5,7 +5,7 @@ local RECONNECTION_MAX_ATTEMPTS = 5
 local BAD_SIGNED_MAX_ATTEMPTS = 10
 local TIMEOUT_SECONDS = 30
 
-local ecc = require("common.ecc")
+local ecc = require("ecc")
 
 --- Converts a byte array to a string
 -- @param byteArray table The byte array
