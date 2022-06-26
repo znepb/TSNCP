@@ -159,14 +159,14 @@ function Server:start()
   while true do
     local event, side, channel, replyChannel, message, distance = os.pullEvent("modem_message")
 
-    print("[OS NFO] Request from " .. distance .. " blocks away")
-
     if channel == self.port and replyChannel == self.port then
       if type(message) == "table" then
-        if message.v == 1 then
+        if message.v == 1 and message.o == self.certificate.name then
+          print("[OS NFO] Request from " .. distance .. " blocks away")
+
           if not message.a then
             -- Message is not authenticated
-            if message.t and message.i and message.d and message.o == self.certificate.name then
+            if message.t and message.i and message.d then
               if self.events[message.t] then
                 print("[OS NFO] Executing event " .. message.t)
                 xpcall(function()
@@ -204,30 +204,33 @@ function Server:start()
             -- Message is authenticated
             xpcall(function()
               local session = self.sessions[message.i]
-              local now = os.epoch("utc")
-
-              if message.t + 250 < now then return end
-              if session.timestamps[message.t] then return end
 
               if session then
-                local localHash = utils.bats(ecc.sha256.digest(utils.bats(session.shared) .. utils.bats(message.n) .. message.t))
-                if message.h == localHash then
-                  local isValid = ecc.verify(session.clientPublic, message.c, message.s)
+                local now = os.epoch("utc")
 
-                  if isValid then
-                    local crypted = utils.byteArrayToString(ecc.chacha20.crypt(message.c, session.shared, message.n))
-                    local data = textutils.unserialise(crypted)
+                if message.t + 250 < now then return end
+                if session.timestamps[message.t] then return end
 
-                    print("[OS NFO] Executing " .. data.message .. " for validated client " .. message.i)
+                if session then
+                  local localHash = utils.bats(ecc.sha256.digest(utils.bats(session.shared) .. utils.bats(message.n) .. message.t))
+                  if message.h == localHash then
+                    local isValid = ecc.verify(session.clientPublic, message.c, message.s)
 
-                    self.sessions[message.i].timestamps[message.t] = true
-                    local data, key = self.securedEvents[data.message](data.data, message.i)
-                    self:transmitSecure(data, message.i, message.r, key)
+                    if isValid then
+                      local crypted = utils.byteArrayToString(ecc.chacha20.crypt(message.c, session.shared, message.n))
+                      local data = textutils.unserialise(crypted)
+
+                      print("[OS NFO] Executing " .. data.message .. " for validated client " .. message.i)
+
+                      self.sessions[message.i].timestamps[message.t] = true
+                      local data, key = self.securedEvents[data.message](data.data, message.i)
+                      self:transmitSecure(data, message.i, message.r, key)
+                    else
+                      print("[OS NFO] Invalid signature!")
+                    end
                   else
-                    print("[OS NFO] Invalid signature!")
+                    print("[OS NFO] Invalid hash!")
                   end
-                else
-                  print("[OS NFO] Invalid hash!")
                 end
               end
             end, function(err)
