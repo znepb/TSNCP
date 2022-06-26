@@ -76,8 +76,6 @@ function Server:transmitSecure(d, r, i, key)
   local data = textutils.serialise(d)
   local nonce = utils.genNonce(12)
   local crypted = ecc.chacha20.crypt(data, key, nonce)
-
-  print(d, data, r)
   
   self.modem.transmit(self.port, self.port, {
     a = true,
@@ -196,9 +194,6 @@ function Server:start()
                   print("[OS NFO] Executing " .. data.message .. " for validated client " .. message.i)
 
                   local data, key = self.securedEvents[data.message](data.data, message.i)
-
-                  print(textutils.serialise(data))
-
                   self:transmitSecure(data, message.r, message.i, key)
                 else
                   print("[OS NFO] Invalid signature!")
